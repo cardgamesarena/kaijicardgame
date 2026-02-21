@@ -95,4 +95,15 @@ function removePlayer(socketId) {
   return null;
 }
 
-module.exports = { createRoom, joinRoom, startGame, playCard, requestReplay, removePlayer };
+function getAvailableRooms() {
+  return Object.values(rooms)
+    .filter(room => room.status === 'waiting' && room.players.length < 2)
+    .map(room => ({
+      id: room.id,
+      players: room.players.map(p => ({ pseudo: p.pseudo })),
+      playerCount: room.players.length,
+      maxPlayers: 2
+    }));
+}
+
+module.exports = { createRoom, joinRoom, startGame, playCard, requestReplay, removePlayer, getAvailableRooms };

@@ -18,10 +18,16 @@ app.get('/health', (req, res) => res.sendStatus(200));
 io.on('connection', (socket) => {
   console.log('✅ Connecté : ' + socket.id);
 
+  socket.on('get_available_rooms', () => {
+    const rooms = roomManager.getAvailableRooms();
+    socket.emit('available_rooms', rooms);
+  });
+
   socket.on('create_room', ({ pseudo }) => {
     const room = roomManager.createRoom(socket.id, pseudo);
     socket.join(room.id);
     socket.emit('room_updated', room);
+    io.emit('rooms_changed'); // Notifier tous les clients qu'une room a été créée
     console.log('Room créée : ' + room.id + ' par ' + pseudo);
   });
 
@@ -30,6 +36,7 @@ io.on('connection', (socket) => {
     if (result.error) return socket.emit('error', { message: result.error });
     socket.join(room_id);
     io.to(room_id).emit('room_updated', result.room);
+    io.emit('rooms_changed'); // Notifier tous les clients qu'une room a changé
   });
 
   socket.on('start_game', ({ room_id }) => {
@@ -71,7 +78,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     const affected = roomManager.removePlayer(socket.id);
-    if (affected) io.to(affected.room_id).emit('room_updated', affected.room);
+    if (affected) {
+      io.to(affected.room_id).emit('room_updated', affected.room);
+      io.emit('rooms_changed'); // Notifier tous les clients qu'une room a changé
+    }
     console.log('❌ Déconnecté : ' + socket.id);
   });
 });

@@ -11,11 +11,45 @@
     <h1>🃏 Kaiji — Empereur / Esclave</h1>
 
     <div id="screen-lobby">
-      <input id="input-pseudo" type="text" placeholder="Ton pseudo" maxlength="16" />
-      <button id="btn-create">Créer une room</button>
-      <hr/>
-      <input id="input-room-id" type="text" placeholder="ID de la room" maxlength="5" />
-      <button id="btn-join">Rejoindre</button>
+      <div class="lobby-header">
+        <input id="input-pseudo" type="text" placeholder="Ton pseudo" maxlength="16" />
+      </div>
+
+      <div class="lobby-tabs">
+        <button class="tab-btn active" data-tab="create">Créer une room</button>
+        <button class="tab-btn" data-tab="join">Rejoindre une room</button>
+      </div>
+
+      <div id="tab-create" class="tab-content active">
+        <div class="create-room-section">
+          <p class="tab-description">Créez une nouvelle partie et invitez vos amis !</p>
+          <button id="btn-create" class="btn-primary">🎮 Créer une room</button>
+        </div>
+      </div>
+
+      <div id="tab-join" class="tab-content">
+        <div class="join-methods">
+          <div class="join-by-id">
+            <h3>Rejoindre avec un code</h3>
+            <div class="join-id-form">
+              <input id="input-room-id" type="text" placeholder="Code de la room" maxlength="5" />
+              <button id="btn-join" class="btn-primary">Rejoindre</button>
+            </div>
+          </div>
+
+          <div class="divider">
+            <span>OU</span>
+          </div>
+
+          <div class="join-from-list">
+            <h3>Rooms disponibles</h3>
+            <button id="btn-refresh-rooms" class="btn-secondary">🔄 Actualiser</button>
+            <div id="rooms-list" class="rooms-list">
+              <p class="loading-text">Chargement des rooms...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="screen-room" class="hidden">

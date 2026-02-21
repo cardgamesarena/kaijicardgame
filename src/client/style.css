@@ -15,9 +15,14 @@ body {
   border-radius: 12px;
   padding: 2rem;
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
   text-align: center;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+#screen-game #app,
+#screen-room #app {
+  max-width: 420px;
 }
 
 h1 { margin-bottom: 1.5rem; font-size: 1.4rem; }
@@ -42,6 +47,259 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 hr { margin: 1rem 0; border-color: #0f3460; }
 .hidden { display: none !important; }
+
+/* ----- Lobby Tabs ----- */
+
+#screen-lobby {
+  max-width: 600px;
+}
+
+.lobby-header {
+  margin-bottom: 1.5rem;
+}
+
+.lobby-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #0f3460;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.8rem;
+  background: transparent;
+  color: #aaa;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background: rgba(233, 69, 96, 0.1);
+  color: #e94560;
+}
+
+.tab-btn.active {
+  color: #e94560;
+  border-bottom-color: #e94560;
+  background: transparent;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-description {
+  text-align: center;
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.create-room-section {
+  padding: 1rem 0;
+}
+
+.btn-primary {
+  background: #e94560;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: #0f3460;
+  width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.btn-secondary:hover {
+  background: #1a4775;
+}
+
+/* ----- Join Methods ----- */
+
+.join-methods {
+  padding: 1rem 0;
+}
+
+.join-by-id {
+  margin-bottom: 2rem;
+}
+
+.join-by-id h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #eee;
+}
+
+.join-id-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.join-id-form input {
+  flex: 1;
+  text-transform: uppercase;
+}
+
+.join-id-form button {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0.6rem 1.5rem;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #0f3460;
+}
+
+.divider span {
+  position: relative;
+  background: #16213e;
+  padding: 0 1rem;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.join-from-list h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #eee;
+  text-align: center;
+}
+
+/* ----- Rooms List ----- */
+
+.rooms-list {
+  background: #0f3460;
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rooms-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rooms-list::-webkit-scrollbar-track {
+  background: #16213e;
+  border-radius: 4px;
+}
+
+.rooms-list::-webkit-scrollbar-thumb {
+  background: #e94560;
+  border-radius: 4px;
+}
+
+.rooms-list::-webkit-scrollbar-thumb:hover {
+  background: #c73652;
+}
+
+.loading-text,
+.no-rooms-text {
+  text-align: center;
+  opacity: 0.6;
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.room-item {
+  background: #16213e;
+  border: 2px solid #1a4775;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.room-item:hover {
+  border-color: #e94560;
+  transform: translateX(4px);
+  background: #1a2944;
+}
+
+.room-item:last-child {
+  margin-bottom: 0;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.room-id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e94560;
+  letter-spacing: 1px;
+}
+
+.room-status {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(233, 69, 96, 0.2);
+  border-radius: 12px;
+  color: #ff8fa3;
+}
+
+.room-players {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.room-players strong {
+  color: #eee;
+}
+
+.room-players-list {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.room-item .btn-join-room {
+  margin-top: 0.8rem;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  background: #e94560;
+}
+
+.room-item .btn-join-room:hover {
+  background: #c73652;
+}
 
 #error-msg {
   background: #e94560; border-radius: 6px;

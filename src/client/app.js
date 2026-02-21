@@ -6,9 +6,60 @@ let myHand = [];
 let lastPlayedCardType = null;
 let opponentHandCount = 5;
 
+// Générer un pseudo aléatoire
+function generateRandomPseudo() {
+  const adjectives = [
+    'Brave', 'Rusé', 'Rapide', 'Sage', 'Noble', 'Audacieux',
+    'Mystérieux', 'Chanceux', 'Puissant', 'Astucieux', 'Malin',
+    'Intrépide', 'Légendaire', 'Epic', 'Génial', 'Habile'
+  ];
+  const nouns = [
+    'Dragon', 'Phoenix', 'Tigre', 'Renard', 'Loup', 'Aigle',
+    'Samourai', 'Ninja', 'Guerrier', 'Joueur', 'Champion',
+    'Stratège', 'Maître', 'As', 'Pro', 'Héros'
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 100);
+  return adj + noun + num;
+}
+
+// Préremplir le pseudo au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('input-pseudo').value = generateRandomPseudo();
+});
+
 function delay(ms) {
   return new Promise(function (resolve) {
     setTimeout(resolve, ms);
+  });
+}
+
+/**
+ * Attend que les deux cartes soient sur la table avant de continuer
+ */
+function waitForCardsOnTable() {
+  return new Promise(function (resolve) {
+    var maxAttempts = 50; // Max 5 secondes (50 * 100ms)
+    var attempts = 0;
+
+    function check() {
+      var slotMine = document.getElementById('table-slot-mine');
+      var slotOpp = document.getElementById('table-slot-opponent');
+      var myCard = slotMine ? slotMine.querySelector('.card') : null;
+      var oppCard = slotOpp ? slotOpp.querySelector('.card') : null;
+
+      if (myCard && oppCard) {
+        resolve();
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(check, 100);
+      } else {
+        // Timeout - on continue quand même
+        resolve();
+      }
+    }
+    check();
   });
 }
 
@@ -132,87 +183,76 @@ function playOpponentCardToTable() {
 }
 
 function revealTableCards(myCardType, opponentCardType, onDone) {
-  var slotMine = document.getElementById('table-slot-mine');
-  var slotOpp = document.getElementById('table-slot-opponent');
-  var myCard = slotMine.querySelector('.card');
-  if (!myCard) {
-    myCard = createCardEl(myCardType, { onTable: true, reveal: true });
-    slotMine.appendChild(myCard);
-  }
-  var oppCard = slotOpp.querySelector('.card');
-  if (!oppCard) {
-    oppCard = createCardEl(opponentCardType, { onTable: true, reveal: true });
-    slotOpp.appendChild(oppCard);
-  }
-  if (myCard) {
-    myCard.classList.remove('card--face-up', 'card--flipped');
-    myCard.querySelector('.card-front').className = 'card-front card--' + myCardType;
-    var icon = CARD_INFO[myCardType];
-    if (icon) {
-      var iconEl = myCard.querySelector('.card-icon');
-      var nameEl = myCard.querySelector('.card-name');
-      if (iconEl) iconEl.textContent = icon.icon;
-      if (nameEl) nameEl.textContent = icon.name;
+  // Attendre que les deux cartes soient bien sur la table (animations terminées)
+  waitForCardsOnTable().then(function () {
+    var slotMine = document.getElementById('table-slot-mine');
+    var slotOpp = document.getElementById('table-slot-opponent');
+
+    // Récupérer les cartes (elles doivent exister maintenant)
+    var myCard = slotMine.querySelector('.card');
+    var oppCard = slotOpp.querySelector('.card');
+
+    // Si pour une raison quelconque les cartes n'existent pas, on les crée
+    if (!myCard) {
+      myCard = createCardEl(myCardType, { onTable: true });
+      slotMine.appendChild(myCard);
     }
-  }
-  oppCard.classList.remove('card--flipped');
-  oppCard.querySelector('.card-front').className = 'card-front card--' + opponentCardType;
-  var opIcon = CARD_INFO[opponentCardType];
-  if (opIcon) {
-    var iconEl = oppCard.querySelector('.card-icon');
-    var nameEl = oppCard.querySelector('.card-name');
-    if (iconEl) iconEl.textContent = opIcon.icon;
-    if (nameEl) nameEl.textContent = opIcon.name;
-  }
-  (function runSequence() {
-    delay(2500)
+    if (!oppCard) {
+      oppCard = createCardEl(opponentCardType, { onTable: true });
+      slotOpp.appendChild(oppCard);
+    }
+
+    // Configurer les faces des cartes (sans les révéler encore)
+    if (myCard) {
+      myCard.classList.remove('card--face-up', 'card--flipped');
+      myCard.querySelector('.card-front').className = 'card-front card--' + myCardType;
+      var icon = CARD_INFO[myCardType];
+      if (icon) {
+        var iconEl = myCard.querySelector('.card-icon');
+        var nameEl = myCard.querySelector('.card-name');
+        if (iconEl) iconEl.textContent = icon.icon;
+        if (nameEl) nameEl.textContent = icon.name;
+      }
+    }
+
+    if (oppCard) {
+      oppCard.classList.remove('card--flipped');
+      oppCard.querySelector('.card-front').className = 'card-front card--' + opponentCardType;
+      var opIcon = CARD_INFO[opponentCardType];
+      if (opIcon) {
+        var iconEl = oppCard.querySelector('.card-icon');
+        var nameEl = oppCard.querySelector('.card-name');
+        if (iconEl) iconEl.textContent = opIcon.icon;
+        if (nameEl) nameEl.textContent = opIcon.name;
+      }
+    }
+
+    // Séquence de révélation simplifiée
+    // Petit délai après que les cartes soient arrivées pour que l'utilisateur les voie bien
+    delay(500)
       .then(function () {
-        myCard = slotMine.querySelector('.card');
-        oppCard = slotOpp.querySelector('.card');
-        if (!oppCard) {
-          oppCard = createCardEl(opponentCardType, { onTable: true, reveal: true });
-          slotOpp.appendChild(oppCard);
-        }
-        if (myCard) {
-          myCard.classList.remove('card--face-up', 'card--flipped');
-          myCard.querySelector('.card-front').className = 'card-front card--' + myCardType;
-          var mi = CARD_INFO[myCardType];
-          if (mi) {
-            var me = myCard.querySelector('.card-icon');
-            var mn = myCard.querySelector('.card-name');
-            if (me) me.textContent = mi.icon;
-            if (mn) mn.textContent = mi.name;
-          }
-        }
-        oppCard.classList.remove('card--flipped');
-        oppCard.querySelector('.card-front').className = 'card-front card--' + opponentCardType;
-        var oi = CARD_INFO[opponentCardType];
-        if (oi) {
-          var oe = oppCard.querySelector('.card-icon');
-          var on = oppCard.querySelector('.card-name');
-          if (oe) oe.textContent = oi.icon;
-          if (on) on.textContent = oi.name;
-        }
-        return delay(1500);
+        return delay(3000); // 3 secondes de suspense avec les deux cartes face cachée
       })
       .then(function () {
+        // Révéler les deux cartes en même temps
         myCard = slotMine.querySelector('.card');
         oppCard = slotOpp.querySelector('.card');
-        if (myCard) myCard.classList.add('card--reveal', 'card--flipped');
-        if (oppCard) oppCard.classList.add('card--reveal', 'card--flipped');
-        return delay(1000);
+        if (myCard) myCard.classList.add('card--reveal');
+        if (oppCard) oppCard.classList.add('card--reveal');
+        return delay(1000); // Rester révélées 1 seconde
       })
       .then(function () {
+        // Faire disparaître les cartes
         myCard = slotMine.querySelector('.card');
         oppCard = slotOpp.querySelector('.card');
         if (myCard) myCard.classList.add('card--disappear');
         if (oppCard) oppCard.classList.add('card--disappear');
-        return delay(600);
+        return delay(600); // Temps de l'animation de disparition
       })
       .then(function () {
         if (typeof onDone === 'function') onDone();
       });
-  })();
+  });
 }
 
 function clearTable() {
@@ -228,6 +268,83 @@ function showError(msg) {
   el.classList.remove('hidden');
   setTimeout(() => el.classList.add('hidden'), 3000);
 }
+
+// Gestion des onglets
+document.querySelectorAll('.tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const tabName = btn.dataset.tab;
+
+    // Retirer la classe active de tous les boutons et contenus
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    // Ajouter la classe active au bouton et contenu cliqués
+    btn.classList.add('active');
+    document.getElementById('tab-' + tabName).classList.add('active');
+
+    // Si on ouvre l'onglet "rejoindre", charger la liste des rooms
+    if (tabName === 'join') {
+      loadAvailableRooms();
+    }
+  });
+});
+
+// Charger les rooms disponibles
+function loadAvailableRooms() {
+  socket.emit('get_available_rooms');
+}
+
+// Afficher les rooms disponibles
+socket.on('available_rooms', (rooms) => {
+  const container = document.getElementById('rooms-list');
+
+  if (!rooms || rooms.length === 0) {
+    container.innerHTML = '<p class="no-rooms-text">Aucune room disponible pour le moment.<br/>Créez-en une nouvelle !</p>';
+    return;
+  }
+
+  container.innerHTML = rooms.map(room => {
+    const playersText = room.players.map(p => p.pseudo).join(', ');
+    return `
+      <div class="room-item" data-room-id="${room.id}">
+        <div class="room-header">
+          <span class="room-id">${room.id}</span>
+          <span class="room-status">${room.playerCount}/${room.maxPlayers}</span>
+        </div>
+        <div class="room-players">
+          <strong>Joueur${room.playerCount > 1 ? 's' : ''} :</strong> ${playersText}
+        </div>
+        <button class="btn-join-room">Rejoindre cette room</button>
+      </div>
+    `;
+  }).join('');
+
+  // Ajouter les event listeners pour les boutons de rejoindre
+  container.querySelectorAll('.room-item').forEach((item) => {
+    const roomId = item.dataset.roomId;
+    const joinBtn = item.querySelector('.btn-join-room');
+    joinBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      myPseudo = document.getElementById('input-pseudo').value.trim();
+      if (!myPseudo) return showError('Entre un pseudo d\'abord');
+      socket.emit('join_room', { room_id: roomId, pseudo: myPseudo });
+    });
+  });
+});
+
+// Actualiser la liste des rooms
+document.getElementById('btn-refresh-rooms').addEventListener('click', () => {
+  loadAvailableRooms();
+});
+
+// Actualiser automatiquement quand les rooms changent
+socket.on('rooms_changed', () => {
+  // Seulement si l'onglet "rejoindre" est actif
+  const joinTab = document.getElementById('tab-join');
+  if (joinTab && joinTab.classList.contains('active')) {
+    loadAvailableRooms();
+  }
+});
 
 document.getElementById('btn-create').addEventListener('click', () => {
   myPseudo = document.getElementById('input-pseudo').value.trim();
@@ -297,7 +414,7 @@ socket.on('opponent_played', function () {
   playOpponentCardToTable();
   var alreadyPlayed = document.getElementById('table-slot-mine').querySelector('.card');
   document.getElementById('round-result').textContent = alreadyPlayed
-    ? "🃏 Révélation..."
+    ? "⏳ L'adversaire a joué sa carte..."
     : "⏳ À toi de jouer !";
 });
 
@@ -315,24 +432,37 @@ socket.on('round_result', (result) => {
       .join(' | ');
 
   opponentHandCount = 5 - result.round;
-  const resultMessage = draw ? 'Égalité' : won ? '✅ Round gagné' : '❌ Round perdu';
+  const resultMessage = draw ? '🤝 Égalité' : won ? '✅ Round gagné' : '❌ Round perdu';
+
+  // Message pendant la révélation
+  document.getElementById('round-result').textContent = "🃏 Révélation des cartes...";
+
   revealTableCards(lastPlayedCardType || myCard, opCard, () => {
-    clearTable();
-    if (result.hand) myHand = shuffleHand(result.hand);
-    renderHand(myHand, false);
-    renderOpponentHand(opponentHandCount);
-    lastPlayedCardType = null;
+    // Afficher le résultat du round
     document.getElementById('round-result').textContent = resultMessage;
+
+    // Attendre un peu pour que le joueur voie le résultat
+    delay(800).then(() => {
+      clearTable();
+      if (result.hand) myHand = shuffleHand(result.hand);
+      renderHand(myHand, false);
+      renderOpponentHand(opponentHandCount);
+      lastPlayedCardType = null;
+      document.getElementById('round-result').textContent = '';
+    });
   });
 });
 
 socket.on('game_over', (winner) => {
-  hide('screen-game');
-  show('screen-gameover');
-  const draw = winner === null;
-  const won = winner && winner.id === socket.id;
-  document.getElementById('winner-text').textContent =
-    draw ? '🤝 Match nul !' : won ? '🏆 Tu as gagné !' : '💀 Tu as perdu...';
+  // Attendre que l'animation du dernier round soit terminée (environ 8 secondes)
+  delay(8000).then(() => {
+    hide('screen-game');
+    show('screen-gameover');
+    const draw = winner === null;
+    const won = winner && winner.id === socket.id;
+    document.getElementById('winner-text').textContent =
+      draw ? '🤝 Match nul !' : won ? '🏆 Tu as gagné !' : '💀 Tu as perdu...';
+  });
 });
 
 document.getElementById('btn-replay').addEventListener('click', () => {
