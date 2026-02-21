@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, '../../src/client')));
 
+app.get('/health', (req, res) => res.sendStatus(200));
+
 io.on('connection', (socket) => {
   console.log('✅ Connecté : ' + socket.id);
 
