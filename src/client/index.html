@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kaiji — Empereur Esclave</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <h1>🃏 Kaiji — Empereur / Esclave</h1>
+
+    <div id="screen-lobby">
+      <input id="input-pseudo" type="text" placeholder="Ton pseudo" maxlength="16" />
+      <button id="btn-create">Créer une room</button>
+      <hr/>
+      <input id="input-room-id" type="text" placeholder="ID de la room" maxlength="5" />
+      <button id="btn-join">Rejoindre</button>
+    </div>
+
+    <div id="screen-room" class="hidden">
+      <p>Room : <strong id="display-room-id"></strong></p>
+      <ul id="players-list"></ul>
+      <button id="btn-start" class="hidden">Lancer la partie</button>
+      <p id="waiting-msg">En attente d'un adversaire...</p>
+    </div>
+
+    <div id="screen-game" class="hidden">
+      <div class="game-header">
+        <p class="round-info">Round <span id="round-number">1</span> / 5</p>
+        <div id="scores" class="scores"></div>
+      </div>
+      <div class="opponent-hand-area">
+        <span class="opponent-hand-label">Main adverse</span>
+        <div id="opponent-hand" class="opponent-hand"></div>
+      </div>
+      <div id="game-table" class="game-table">
+        <div class="table-surface">
+          <div id="table-slot-opponent" class="table-slot table-slot--opponent"></div>
+          <div id="table-slot-mine" class="table-slot table-slot--mine"></div>
+        </div>
+      </div>
+      <div id="round-result" class="round-result"></div>
+      <div class="my-hand-area">
+        <span class="my-hand-label">Ta main</span>
+        <div id="my-hand" class="my-hand"></div>
+      </div>
+    </div>
+
+    <div id="screen-gameover" class="hidden">
+      <h2 id="winner-text"></h2>
+      <p id="replay-waiting-msg" class="hidden">En attente de l'adversaire pour rejouer...</p>
+      <button id="btn-replay">Rejouer (même room, rôles inversés)</button>
+    </div>
+
+    <div id="error-msg" class="hidden"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

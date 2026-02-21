@@ -1,0 +1,313 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+#app {
+  background: #16213e;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+h1 { margin-bottom: 1.5rem; font-size: 1.4rem; }
+
+input {
+  width: 100%; padding: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-radius: 6px; border: none;
+  background: #0f3460; color: #eee;
+}
+
+button {
+  width: 100%; padding: 0.7rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px; border: none;
+  background: #e94560; color: white;
+  cursor: pointer; font-size: 1rem;
+}
+
+button:hover { background: #c73652; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+hr { margin: 1rem 0; border-color: #0f3460; }
+.hidden { display: none !important; }
+
+#error-msg {
+  background: #e94560; border-radius: 6px;
+  padding: 0.5rem; margin-top: 1rem;
+}
+
+/* ----- Game screen: table & cards ----- */
+
+#screen-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.game-header {
+  width: 100%;
+}
+
+.round-info { font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.25rem; }
+.scores { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+.opponent-hand-area,
+.my-hand-area {
+  width: 100%;
+  text-align: center;
+}
+.opponent-hand-label,
+.my-hand-label {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-bottom: 0.35rem;
+}
+.opponent-hand {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-height: 72px;
+  padding: 0.35rem 0;
+}
+.opponent-hand .card {
+  width: 48px;
+  height: 68px;
+  cursor: default;
+}
+.opponent-hand .card .card-inner,
+.opponent-hand .card .card-front,
+.opponent-hand .card .card-back { width: 100%; height: 100%; }
+
+.game-table {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.table-surface {
+  background: linear-gradient(160deg, #0d5c2e 0%, #0a3d1f 50%, #062d16 100%);
+  border-radius: 24px;
+  border: 4px solid #1a4722;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.table-slot {
+  width: 72px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.table-slot--opponent { order: 1; }
+.table-slot--mine { order: 2; }
+
+.round-result {
+  min-height: 2.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.my-hand-area { margin-top: 0.25rem; }
+.my-hand {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 108px;
+  padding: 0.5rem 0;
+}
+
+/* Carte qui vole de la main vers la table (motion lente) */
+.card-flyout {
+  position: fixed;
+  z-index: 1000;
+  transition: left 2.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+              top 2.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+              width 2.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+              height 2.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+}
+
+.card-flyout .card {
+  width: 100%;
+  height: 100%;
+}
+
+/* ----- Card component ----- */
+
+.card {
+  width: 64px;
+  height: 90px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.card:hover:not(.card--disabled):not(.card--on-table) {
+  transform: translateY(-6px);
+}
+
+.card--disabled { cursor: not-allowed; opacity: 0.7; }
+.card--on-table { cursor: default; width: 72px; height: 100px; }
+.card--on-table .card-inner,
+.card--on-table .card-front,
+.card--on-table .card-back { width: 100%; height: 100%; }
+.card--on-table .card-icon { font-size: 1.6rem; }
+.card--on-table .card-name { font-size: 0.65rem; }
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+.card--flipped .card-inner,
+.card--face-up .card-inner { transform: rotateY(180deg); }
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+  border: 2px solid #4a3020;
+  box-shadow: inset 0 0 0 2px #5c3d2a;
+}
+
+.card-back::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(139, 90, 43, 0.4) 4px,
+    rgba(139, 90, 43, 0.4) 8px
+  );
+  border-radius: 4px;
+}
+
+.card-front {
+  transform: rotateY(180deg);
+  border: 2px solid #333;
+}
+
+.card-front.card--emperor {
+  background: linear-gradient(180deg, #d4af37 0%, #b8960c 50%, #8b6914 100%);
+  color: #1a0f0a;
+}
+
+.card-front.card--citizen {
+  background: linear-gradient(180deg, #e8e4dc 0%, #c4b8a8 50%, #9a8c7a 100%);
+  color: #2c2418;
+}
+
+.card-front.card--slave {
+  background: linear-gradient(180deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+  color: #c0b8a8;
+}
+
+.card-front .card-icon { font-size: 1.4rem; margin-bottom: 2px; }
+.card-front .card-name { font-size: 0.6rem; }
+
+/* Table slot card: slow motion onto table (suspense) */
+
+.card--animate-in {
+  animation: cardLandsOnTable 2.8s cubic-bezier(0.15, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes cardLandsOnTable {
+  0% {
+    transform: translateY(-100px) scale(0.7);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-50px) scale(0.88);
+    opacity: 0.8;
+  }
+  85% {
+    transform: translateY(6px) scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Reveal flip (when round_result) */
+
+.card--reveal .card-inner {
+  transition: transform 0.9s cubic-bezier(0.3, 0.6, 0.2, 1);
+  transform: rotateY(180deg);
+}
+
+.card--reveal.card--flipped .card-inner {
+  transform: rotateY(360deg);
+}
+
+/* Disparition des cartes après la révélation */
+.card--disappear {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.card--disappear .card-inner {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Opponent card placeholder (face-down) when waiting */
+
+.card--opponent-waiting.card-back::after {
+  animation: cardPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes cardPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
